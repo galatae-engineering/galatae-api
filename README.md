@@ -1,13 +1,13 @@
 INSTALL:
 
-cd ~/git/galatae_software/python
+cd ~/git/galatae_api
 python3 -m venv venv
 source venv/bin/activate
 pip install inputs
 pip install pyserial
 
 LAUNCH:
-cd ~/git/galatae_software/python
+cd ~/git/galatae_api
 source venv/bin/activate
 python main.py
 

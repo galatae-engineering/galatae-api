@@ -16,9 +16,9 @@ usefull functions:
 
 reset_pos()
 send_message_and_wait_conf(message)
-go_to_point(point)
+go_to_point(point) ["X","Y","Z","A","B"] A=pitch B=roll
 get_position()
 set_joint_speed(speed)
 open_gripper()
 close_gripper()
-got_to_foetus_pos()
+go_to_foetus_pos()

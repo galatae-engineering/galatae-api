@@ -8,7 +8,7 @@ class Robot:
     self.arduino=serial.Serial(port=port, baudrate=115200, timeout=0.1)
     self.absolute_distance_mode=True
     self.foetus_pos=[9.07343,0,103.7765,84.99841]
-    time.sleep(3)
+    time.sleep(2)
 
   def send_message(self,message):
     print(message)

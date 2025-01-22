@@ -85,11 +85,14 @@ class Robot:
     message="F"+str(speed)
     self.send_message_and_wait_conf(message)
 
-  def open_gripper(self):
-    self.send_message_and_wait_conf("M101")
+  def open_gripper(self,extra_degrees=0):
+    gcode="M101"
+    if(extra_degrees!=0):
+      gcode+="P"+str(extra_degrees)
+    self.send_message_and_wait_conf(gcode)
 
   def close_gripper(self,extra_degrees=0):
-    self.send_message_and_wait_conf("M100 P"+str(extra_degrees))
+    self.send_message_and_wait_conf("M100P"+str(extra_degrees))
 
   def calibrate_gripper(self):
     self.send_message_and_wait_conf("$H")

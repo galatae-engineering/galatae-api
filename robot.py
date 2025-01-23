@@ -44,7 +44,7 @@ class Robot:
     return ok
 
   def get_gcode_arguments_string(self,args):
-    names=["X","Y","Z","A","B"]
+    names=["X","Y","Z","A","B","C"]
     s=""
     for i in range(len(args)):
       s=s+" "+names[i]+str(args[i])
@@ -60,7 +60,7 @@ class Robot:
       self.send_message_and_wait_conf(["G91","G90"][expected_value])
       self.absolute_distance_mode=expected_value
 
-  #point=[x,y,z,roll,pitch (relative to z axis), yaw (relative to arm)]
+  #point=[x,y,z,roll,pitch (relative to z axis), yaw (relative to arm),gripper angle]
   def go_to_point(self,point):
     self.update_absolute_distance_mode(True)
     self.move(point)

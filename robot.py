@@ -11,7 +11,7 @@ class Robot:
     time.sleep(2)
 
   def send_message(self,message):
-    print(message)
+    #print(message)
     self.arduino.write((message+"\n").encode('utf-8'))
 
   def read_message(self):
@@ -33,10 +33,13 @@ class Robot:
 
   def send_message_and_wait_conf(self,message):
     self.send_message(message)
+    print(message+" sent")
     message=self.wait_for_message()
     
     while(message!="ok" and message!="error"):
       message=self.wait_for_message()
+
+    print("confirmation received")
 
     ok=False
     if(message=="ok"):

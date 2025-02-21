@@ -63,7 +63,7 @@ class Robot:
       self.send_message_and_wait_conf(["G91","G90"][expected_value])
       self.absolute_distance_mode=expected_value
 
-  #point=[x,y,z,roll,pitch (relative to z axis), yaw (relative to arm),gripper angle]
+  #point=[x,y,z,pitch (relative to z axis), roll (relative to arm),gripper angle]
   def go_to_point(self,point):
     self.update_absolute_distance_mode(True)
     self.move(point)

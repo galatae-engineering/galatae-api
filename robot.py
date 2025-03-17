@@ -50,7 +50,7 @@ class Robot:
     names=["X","Y","Z","A","B","C"]
     s=""
     for i in range(len(args)):
-      s=s+" "+names[i]+str(args[i])
+      s=s+names[i]+str(args[i])
 
     return s
 
@@ -102,3 +102,6 @@ class Robot:
 
   def go_to_foetus_pos(self):
     self.send_message_and_wait_conf("G28")
+
+  def set_tool(self,args): #[x,y,z]
+    self.send_message_and_wait_conf("G10L2P1"+self.get_gcode_arguments_string(args))

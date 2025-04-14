@@ -72,11 +72,11 @@ class Robot:
     self.update_absolute_distance_mode(False)
     self.move(point)
 
-  def get_position(self):
+  def get_pose(self):
     self.send_message("?")
     message=self.wait_for_message()
-    print(message)
-    return json.loads(message)["pos"]
+    #print(message)
+    return json.loads(message)["tool_pose"]
     
   #place the robot in foetus position and launch this command
   def reset_pos(self):

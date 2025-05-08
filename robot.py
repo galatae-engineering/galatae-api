@@ -72,6 +72,11 @@ class Robot:
     self.update_absolute_distance_mode(False)
     self.move(point)
 
+  def get_robot_pos_json():
+    self.send_message("?")
+    message=self.wait_for_message()
+    return message
+
   def get_pose(self):
     self.send_message("?")
     message=self.wait_for_message()

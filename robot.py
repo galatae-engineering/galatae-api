@@ -77,6 +77,12 @@ class Robot:
     message=self.wait_for_message()
     #print(message)
     return json.loads(message)["tool_pose"]
+
+  def get_angles(self):
+    self.send_message("?")
+    message=self.wait_for_message()
+    #print(message)
+    return json.loads(message)["angles"]
     
   #place the robot in foetus position and launch this command
   def reset_pos(self):

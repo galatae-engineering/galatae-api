@@ -72,21 +72,24 @@ class Robot:
     self.update_absolute_distance_mode(False)
     self.move(point)
 
-  def get_robot_pos_json():
+  """
+  def get_robot_pos_json(self):
     self.send_message("?")
     message=self.wait_for_message()
-    return message
-
+    return json.loads(message)
+  """
   def get_pose(self):
     self.send_message("?")
     message=self.wait_for_message()
-    #print(message)
-    return json.loads(message)["tool_pose"]
+    print("a")
+    print(message)
+    print("b")
+    return json.loads(message)["angles"]
 
   def get_angles(self):
     self.send_message("?")
     message=self.wait_for_message()
-    #print(message)
+    print(message)
     return json.loads(message)["angles"]
     
   #place the robot in foetus position and launch this command

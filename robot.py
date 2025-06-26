@@ -81,9 +81,7 @@ class Robot:
   def get_pose(self):
     self.send_message("?")
     message=self.wait_for_message()
-    print("a")
     print(message)
-    print("b")
     return json.loads(message)["angles"]
 
   def get_angles(self):

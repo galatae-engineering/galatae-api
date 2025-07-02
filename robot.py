@@ -11,7 +11,7 @@ class Robot:
     time.sleep(2)
 
   def send_message(self,message):
-    print(message+" sent")
+    #print(message+" sent")
     self.arduino.write((message+"\n").encode('utf-8'))
 
   def read_message(self):
@@ -27,7 +27,7 @@ class Robot:
       time.sleep(0.001)
     
     message=message.strip()
-    print("arduino: "+message)
+    #print("arduino: "+message)
     
     return message
 
@@ -37,8 +37,6 @@ class Robot:
     
     while(message!="ok" and message!="error"):
       message=self.wait_for_message()
-
-    #print("confirmation received")
 
     ok=False
     if(message=="ok"):
@@ -76,17 +74,14 @@ class Robot:
     message=self.wait_for_message()
     if(message == "ok"):
       print("error, get_tool_pose intercepted ok message")
-      #tool_pose=json.loads(message)["tool_pose"]  
     return message
 
   def get_tool_pose(self):
-    message=self.get_robot_pos_json(self)
-    return json.loads(message)["tool_pose"]  
+    message=self.get_robot_pos_json()
+    return json.loads(message)["tool_pose"]
 
   def get_angles(self):
-    self.send_message("?")
-    message=self.wait_for_message()
-    #print(message)
+    message=self.get_robot_pos_json()
     return json.loads(message)["angles"]
     
   #place the robot in foetus position and launch this command

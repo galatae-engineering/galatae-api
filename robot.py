@@ -71,21 +71,17 @@ class Robot:
     self.update_absolute_distance_mode(False)
     self.move(point)
 
-  """
   def get_robot_pos_json(self):
     self.send_message("?")
     message=self.wait_for_message()
-    return json.loads(message)
-  """
+    if(message == "ok"):
+      print("error, get_tool_pose intercepted ok message")
+      #tool_pose=json.loads(message)["tool_pose"]  
+    return message
+
   def get_tool_pose(self):
-    self.send_message("?")
-    message=self.wait_for_message()
-    #print(message)
-    if(message != "ok"):
-        tool_pose=json.loads(message)["tool_pose"]
-    else:
-        tool_pose=""
-    return tool_pose
+    message=self.get_robot_pos_json(self)
+    return json.loads(message)["tool_pose"]  
 
   def get_angles(self):
     self.send_message("?")

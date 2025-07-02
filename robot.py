@@ -5,13 +5,13 @@ import json
 
 class Robot:
   def __init__(self,port):
-    self.arduino=serial.Serial(port=port, baudrate=115200, timeout=0.1)
+    self.arduino=serial.Serial(port=port, baudrate=9600, timeout=0.1)
     self.absolute_distance_mode=True
     self.foetus_pos=[9.07343,0,103.7765,84.99841]
     time.sleep(2)
 
   def send_message(self,message):
-    #print(message)
+    print(message+" sent")
     self.arduino.write((message+"\n").encode('utf-8'))
 
   def read_message(self):
@@ -27,13 +27,12 @@ class Robot:
       time.sleep(0.001)
     
     message=message.strip()
-    #print("arduino: "+message)
+    print("arduino: "+message)
     
     return message
 
   def send_message_and_wait_conf(self,message):
     self.send_message(message)
-    #print(message+" sent")
     message=self.wait_for_message()
     
     while(message!="ok" and message!="error"):

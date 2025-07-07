@@ -53,8 +53,12 @@ class Robot:
 
   def move(self,point):
     message="G1"+self.get_gcode_arguments_string(point)
-    self.send_message_and_wait_conf(message)
-
+    return self.send_message_and_wait_conf(message)
+  
+  def probe(self,point):
+    message="G38.2"+self.get_gcode_arguments_string(point)
+    return self.send_message_and_wait_conf(message)
+  
   def update_absolute_distance_mode(self,expected_value):
     if(self.absolute_distance_mode != expected_value):
       self.send_message_and_wait_conf(["G91","G90"][expected_value])

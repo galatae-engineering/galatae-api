@@ -11,7 +11,7 @@ class Robot:
     time.sleep(2)
 
   def send_message(self,message):
-    #print(message+" sent")
+    print(message+" sent")
     self.arduino.write((message+"\n").encode('utf-8'))
 
   def read_message(self):
@@ -27,7 +27,7 @@ class Robot:
       time.sleep(0.001)
     
     message=message.strip()
-    #print("arduino: "+message)
+    print("arduino: "+message)
     
     return message
 
@@ -47,7 +47,7 @@ class Robot:
     names=["X","Y","Z","A","B","C"]
     s=""
     for i in range(len(args)):
-      s=s+names[i]+str(args[i])
+      s=s+names[i]+str(round(args[i],2))
 
     return s
 

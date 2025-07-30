@@ -38,10 +38,13 @@ class Robot:
     while(message!="ok" and message!="error"):
       message=self.wait_for_message()
 
-    ok=False
     if(message=="ok"):
-      ok=True
-    return ok
+      success=True
+    else:
+      success=False
+      self.wait_for_message()
+
+    return success
 
   def get_gcode_arguments_string(self,args):
     names=["X","Y","Z","A","B","C"]

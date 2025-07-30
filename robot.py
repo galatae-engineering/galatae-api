@@ -42,9 +42,7 @@ class Robot:
       success=True
     else:
       success=False
-      print("a")
       self.wait_for_message()
-      print("b")
 
     return success
 

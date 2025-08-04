@@ -2,34 +2,53 @@ import serial
 import time
 from threading import Thread
 import json
+import math
 
 class Robot:
   def __init__(self,port):
     self.arduino=serial.Serial(port=port, baudrate=9600, timeout=0.1)
     self.absolute_distance_mode=True
     self.foetus_pos=[9.07343,0,103.7765,84.99841]
+    self.debug=False
     time.sleep(2)
 
   def send_message(self,message):
-    print(message+" sent")
     self.arduino.write((message+"\n").encode('utf-8'))
+    if(self.debug):
+      print(message+" sent")
 
   def read_message(self):
     a=self.arduino.readline()
     data = a.decode('utf-8', errors='ignore')
     return data
 
-  def wait_for_message(self):
+  def print_message_from_serial(self,message):
+    print("arduino: "+message)
+
+  def read_serial_buffer(self):
     message=self.read_message()
+    return message.strip()
+
+  def wait_for_message(self):
+    message=self.read_serial_buffer()
     
     while(message==""):
-      message=self.read_message()
+      message=self.read_serial_buffer()
       time.sleep(0.001)
-    
-    message=message.strip()
-    print("arduino: "+message)
+
+    if(self.debug):
+      self.print_message_from_serial(message)
     
     return message
+
+  def drop_all_serial_messages(self):
+    message=self.read_serial_buffer()
+
+    while(message!=""):
+      if(self.debug):
+        self.print_message_from_serial(message)
+      message=self.read_serial_buffer()
+
 
   def send_message_and_wait_conf(self,message):
     self.send_message(message)
@@ -42,7 +61,7 @@ class Robot:
       success=True
     else:
       success=False
-      self.wait_for_message()
+      self.drop_all_serial_messages()
 
     return success
 
@@ -71,7 +90,7 @@ class Robot:
   def go_to_point(self,point):
     self.update_absolute_distance_mode(True)
     self.move(point)
-
+      
   def jog(self,point):
     self.update_absolute_distance_mode(False)
     self.move(point)
@@ -86,6 +105,31 @@ class Robot:
   def get_tool_pose(self):
     message=self.get_robot_pos_json()
     return json.loads(message)["tool_pose"]
+
+  def get_point_in_line_segment(self,p1,p2,rel_pos):
+    p=[]
+    number_of_indexes=min(len(p1),len(p2))
+
+    for i in range(number_of_indexes):
+      p.append(p1[i]+(p2[i]-p1[i])*rel_pos)
+
+    return p
+
+  def dist_between_vectors(self,p1,p2):
+    square_dist=0
+    for i in range(len(p2)):
+      print(i)
+      square_dist+=math.pow(p2[i]-p1[i],2)
+
+    return math.sqrt(square_dist)
+
+  def linear_move_to_point(self,p2):
+    p1=self.get_tool_pose()
+    N=math.ceil(self.dist_between_vectors(p1,p2))
+
+    for i in range(N+1):
+      intermediate_point=self.get_point_in_line_segment(p1,p2,i/N)
+      self.go_to_point(intermediate_point)
 
   def get_angles(self):
     message=self.get_robot_pos_json()

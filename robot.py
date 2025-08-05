@@ -41,15 +41,6 @@ class Robot:
     
     return message
 
-  def drop_all_serial_messages(self):
-    message=self.read_serial_buffer()
-
-    while(message!=""):
-      if(self.debug):
-        self.print_message_from_serial(message)
-      message=self.read_serial_buffer()
-
-
   def send_message_and_wait_conf(self,message):
     self.send_message(message)
     message=self.wait_for_message()
@@ -61,7 +52,6 @@ class Robot:
       success=True
     else:
       success=False
-      self.drop_all_serial_messages()
 
     return success
 
@@ -95,16 +85,24 @@ class Robot:
     self.update_absolute_distance_mode(False)
     self.move(point)
 
-  def get_robot_pos_json(self):
+  def ask_for_pos_json_and_return_property_value(self,property_name):
     self.send_message("?")
-    message=self.wait_for_message()
-    if(message == "ok"):
-      print("error, get_tool_pose intercepted ok message")
-    return message
+    
+    property_value=""
+    while(property_value==""):
+      message=self.wait_for_message()
+      try:
+        property_value=json.loads(message)[property_name]
+      except:
+        pass
+
+    return property_value
 
   def get_tool_pose(self):
-    message=self.get_robot_pos_json()
-    return json.loads(message)["tool_pose"]
+    return self.ask_for_pos_json_and_return_property_value("tool_pose")
+  
+  def get_angles(self):
+    return self.ask_for_pos_json_and_return_property_value("angles")
 
   def get_point_in_line_segment(self,p1,p2,rel_pos):
     p=[]
@@ -130,11 +128,7 @@ class Robot:
     for i in range(N+1):
       intermediate_point=self.get_point_in_line_segment(p1,p2,i/N)
       self.go_to_point(intermediate_point)
-
-  def get_angles(self):
-    message=self.get_robot_pos_json()
-    return json.loads(message)["angles"]
-    
+  
   #place the robot in foetus position and launch this command
   def reset_pos(self):
     message="G92"+self.get_gcode_arguments_string(self.foetus_pos)

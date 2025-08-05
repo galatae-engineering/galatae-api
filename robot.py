@@ -5,12 +5,13 @@ import json
 import math
 
 class Robot:
-  def __init__(self,port):
+  def __init__(self,port,debug=False):
     self.arduino=serial.Serial(port=port, baudrate=9600, timeout=0.1)
     self.absolute_distance_mode=True
     self.foetus_pos=[9.07343,0,103.7765,84.99841]
-    self.debug=False
+    self.debug=debug
     time.sleep(2)
+    self.reset_pos()
 
   def send_message(self,message):
     self.arduino.write((message+"\n").encode('utf-8'))

@@ -104,6 +104,16 @@ class Robot:
   
   def get_angles(self):
     return self.ask_for_pos_json_and_return_property_value("angles")
+  
+  #place the robot in foetus position and launch this command
+  def reset_pos(self):
+    message="G92"+self.get_gcode_arguments_string(self.foetus_pos)
+    self.send_message_and_wait_conf(message)
+
+  #speed in deg/s , 100 deg/s is like a good value
+  def set_joint_speed(self,speed):
+    message="F"+str(speed)
+    self.send_message_and_wait_conf(message)
 
   def get_point_in_line_segment(self,p1,p2,rel_pos):
     p=[]
@@ -117,28 +127,36 @@ class Robot:
   def dist_between_vectors(self,p1,p2):
     square_dist=0
     for i in range(len(p2)):
-      print(i)
       square_dist+=math.pow(p2[i]-p1[i],2)
 
     return math.sqrt(square_dist)
 
+  def set_joint_speed_and_get_number_of_iterations(self,p1,p2):
+    self.set_joint_speed(1000)
+    distance=self.dist_between_vectors(p1,p2)
+    N=math.ceil(distance)
+    return N
+  
   def linear_move_to_point(self,p2):
     p1=self.get_tool_pose()
-    N=math.ceil(self.dist_between_vectors(p1,p2))
+    N=self.set_joint_speed_and_get_number_of_iterations(p1,p2)
 
     for i in range(N+1):
       intermediate_point=self.get_point_in_line_segment(p1,p2,i/N)
       self.go_to_point(intermediate_point)
-  
-  #place the robot in foetus position and launch this command
-  def reset_pos(self):
-    message="G92"+self.get_gcode_arguments_string(self.foetus_pos)
-    self.send_message_and_wait_conf(message)
 
-  #speed in deg/s , 100 deg/s is like a good value
-  def set_joint_speed(self,speed):
-    message="F"+str(speed)
-    self.send_message_and_wait_conf(message)
+  def linear_probe(self,p2):
+    p1=self.get_tool_pose()
+    N=self.set_joint_speed_and_get_number_of_iterations(p1,p2)
+    
+    success=False
+    i=0
+    while(i<=N and success==False):
+      intermediate_point=self.get_point_in_line_segment(p1,p2,i/N)
+      success=self.probe(intermediate_point)
+      i+=1
+
+    return success
 
   def open_gripper(self,extra_degrees=0):
     gcode="M101"

@@ -6,7 +6,7 @@ import math
 
 class Robot:
   def __init__(self,port,debug=False):
-    self.arduino=serial.Serial(port=port, baudrate=9600, timeout=0.1)
+    self.arduino=serial.Serial(port=port, baudrate=115200, timeout=0.1)
     self.absolute_distance_mode=True
     self.foetus_pos=[9.07343,0,103.7765,84.99841]
     self.debug=debug

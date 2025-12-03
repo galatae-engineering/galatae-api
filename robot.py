@@ -11,7 +11,7 @@ class Robot:
     self.foetus_pos=[9.07343,0,103.7765,84.99841]
     self.debug=debug
     time.sleep(2)
-    self.reset_pos()
+    #self.reset_pos()
 
   def send_message(self,message):
     self.arduino.write((message+"\n").encode('utf-8'))

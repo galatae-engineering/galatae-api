@@ -1,6 +1,6 @@
 INSTALL:
 
-cd ~/git/galatae_api
+cd ~/git/galatae-api
 python3 -m venv venv
 source venv/bin/activate
 pip install inputs
@@ -9,7 +9,7 @@ pip install pyserial
 LAUNCH:
 cd ~/git/galatae_api
 source venv/bin/activate
-python main.py
+python robot.py
 
 
 usefull functions:

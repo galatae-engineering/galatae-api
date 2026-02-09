@@ -8,10 +8,8 @@ class Robot:
   def __init__(self,port,debug=False):
     self.arduino=serial.Serial(port=port, baudrate=115200, timeout=0.1)
     self.absolute_distance_mode=True
-    self.foetus_pos=[9.07343,0,103.7765,84.99841]
     self.debug=debug
     time.sleep(2)
-    #self.reset_pos()
 
   def send_message(self,message):
     self.arduino.write((message+"\n").encode('utf-8'))
@@ -56,20 +54,23 @@ class Robot:
 
     return success
 
-  def get_gcode_arguments_string(self,args):
-    names=["X","Y","Z","A","B","C"]
+  def get_gcode_arguments_string(self,args,args_represent_pose=True):
+    if(args_represent_pose):
+      gcode_words=["X","Y","Z","A","B","C"]
+    else:
+      gcode_words=["I","J","K","L","M","N"]
     s=""
     for i in range(len(args)):
-      s=s+names[i]+str(round(args[i],2))
+      s=s+gcode_words[i]+str(round(args[i],2))
 
     return s
 
-  def move(self,point):
-    message="G1"+self.get_gcode_arguments_string(point)
+  def move(self,pose):
+    message="G1"+self.get_gcode_arguments_string(pose)
     return self.send_message_and_wait_conf(message)
   
-  def probe(self,point):
-    message="G38.2"+self.get_gcode_arguments_string(point)
+  def probe(self,pose):
+    message="G38.2"+self.get_gcode_arguments_string(pose)
     return self.send_message_and_wait_conf(message)
   
   def update_absolute_distance_mode(self,expected_value):
@@ -77,14 +78,14 @@ class Robot:
       self.send_message_and_wait_conf(["G91","G90"][expected_value])
       self.absolute_distance_mode=expected_value
 
-  #point=[x,y,z,pitch (relative to z axis), roll (relative to arm),gripper angle]
-  def go_to_point(self,point):
+  #pose=[x,y,z,pitch (relative to z axis), roll (relative to arm),gripper angle]
+  def go_to_pose(self,pose):
     self.update_absolute_distance_mode(True)
-    self.move(point)
+    self.move(pose)
       
-  def jog(self,point):
+  def jog(self,pose):
     self.update_absolute_distance_mode(False)
-    self.move(point)
+    self.move(pose)
 
   def ask_for_pos_json_and_return_property_value(self,property_name):
     self.send_message("?")
@@ -105,9 +106,8 @@ class Robot:
   def get_angles(self):
     return self.ask_for_pos_json_and_return_property_value("angles")
   
-  #place the robot in foetus position and launch this command
-  def reset_pos(self):
-    message="G92"+self.get_gcode_arguments_string(self.foetus_pos)
+  def reset_angles(self,angles):
+    message="G92"+self.get_gcode_arguments_string(angles,False)
     self.send_message_and_wait_conf(message)
 
   #speed in deg/s , 100 deg/s is like a good value
@@ -137,13 +137,13 @@ class Robot:
     N=math.ceil(distance)
     return N
   
-  def linear_move_to_point(self,p2):
+  def linear_move_to_pose(self,p2):
     p1=self.get_tool_pose()
     N=self.set_joint_speed_and_get_number_of_iterations(p1,p2)
 
     for i in range(N+1):
-      intermediate_point=self.get_point_in_line_segment(p1,p2,i/N)
-      self.go_to_point(intermediate_point)
+      intermediate_pose=self.get_pose_in_line_segment(p1,p2,i/N)
+      self.go_to_pose(intermediate_pose)
 
   def linear_probe(self,p2):
     p1=self.get_tool_pose()
@@ -152,8 +152,8 @@ class Robot:
     success=False
     i=0
     while(i<=N and success==False):
-      intermediate_point=self.get_point_in_line_segment(p1,p2,i/N)
-      success=self.probe(intermediate_point)
+      intermediate_pose=self.get_point_in_line_segment(p1,p2,i/N)
+      success=self.probe(intermediate_pose)
       i+=1
 
     return success

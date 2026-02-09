@@ -3,58 +3,70 @@ import time
 from threading import Thread
 import json
 import math
+import serial.tools.list_ports
 
 class Robot:
-  def __init__(self,port,debug=False):
-    self.arduino=serial.Serial(port=port, baudrate=115200, timeout=0.1)
+  def __init__(self,debug=False):
     self.absolute_distance_mode=True
     self.debug=debug
-    time.sleep(2)
 
-  def send_message(self,message):
+    port_name=None
+    ports = list(serial.tools.list_ports.comports())
+    for p in ports:
+      if(p.description=="Giga"):
+        port_name=p.device
+    
+    if(port_name==None):
+      print("Error, no arduino found")
+
+    self.arduino=serial.Serial(port=port_name, baudrate=115200, timeout=0.1)
+    time.sleep(2)
+    #self.reset_and_home_joints()
+
+  def _send_message(self,message):
     self.arduino.write((message+"\n").encode('utf-8'))
     if(self.debug):
       print(message+" sent")
 
-  def read_message(self):
+  def _read_message(self):
     a=self.arduino.readline()
     data = a.decode('utf-8', errors='ignore')
     return data
 
-  def print_message_from_serial(self,message):
+  def _print_message_from_serial(self,message):
     print("arduino: "+message)
 
-  def read_serial_buffer(self):
-    message=self.read_message()
+  def _read_serial_buffer(self):
+    message=self._read_message()
     return message.strip()
 
-  def wait_for_message(self):
-    message=self.read_serial_buffer()
+  def send_message_and_wait_conf(self,message):
+    self._send_message(message)
+    return self._wait_for_conf()
+
+  def _wait_for_message(self):
+    message=self._read_serial_buffer()
     
     while(message==""):
-      message=self.read_serial_buffer()
+      message=self._read_serial_buffer()
       time.sleep(0.001)
 
     if(self.debug):
-      self.print_message_from_serial(message)
+      self._print_message_from_serial(message)
     
     return message
 
-  def send_message_and_wait_conf(self,message):
-    self.send_message(message)
-    message=self.wait_for_message()
-    
+  def _wait_for_conf(self):
+    message=self._wait_for_message()
     while(message!="ok" and message!="error"):
-      message=self.wait_for_message()
+      message=self._wait_for_message()
 
-    if(message=="ok"):
-      success=True
-    else:
-      success=False
+    return message=="ok"
 
-    return success
+  def reset_and_home_joints(self):
+    self.send_message_and_wait_conf("$H")
 
-  def get_gcode_arguments_string(self,args,args_represent_pose=True):
+  def _get_gcode_arguments_string(self,args,args_represent_pose=True):
     if(args_represent_pose):
       gcode_words=["X","Y","Z","A","B","C"]
     else:
@@ -65,12 +77,12 @@ class Robot:
 
     return s
 
-  def move(self,pose):
-    message="G1"+self.get_gcode_arguments_string(pose)
+  def _move(self,pose):
+    message="G1"+self._get_gcode_arguments_string(pose)
     return self.send_message_and_wait_conf(message)
   
   def probe(self,pose):
-    message="G38.2"+self.get_gcode_arguments_string(pose)
+    message="G38.2"+self._get_gcode_arguments_string(pose)
     return self.send_message_and_wait_conf(message)
   
   def update_absolute_distance_mode(self,expected_value):
@@ -81,18 +93,18 @@ class Robot:
   #pose=[x,y,z,pitch (relative to z axis), roll (relative to arm),gripper angle]
   def go_to_pose(self,pose):
     self.update_absolute_distance_mode(True)
-    self.move(pose)
+    self._move(pose)
       
   def jog(self,pose):
     self.update_absolute_distance_mode(False)
-    self.move(pose)
+    self._move(pose)
 
-  def ask_for_pos_json_and_return_property_value(self,property_name):
-    self.send_message("?")
+  def _ask_for_pos_json_and_return_property_value(self,property_name):
+    self._send_message("?")
     
     property_value=""
     while(property_value==""):
-      message=self.wait_for_message()
+      message=self._wait_for_message()
       try:
         property_value=json.loads(message)[property_name]
       except:
@@ -101,13 +113,13 @@ class Robot:
     return property_value
 
   def get_tool_pose(self):
-    return self.ask_for_pos_json_and_return_property_value("tool_pose")
+    return self._ask_for_pos_json_and_return_property_value("tool_pose")
   
   def get_angles(self):
-    return self.ask_for_pos_json_and_return_property_value("angles")
+    return self._ask_for_pos_json_and_return_property_value("angles")
   
   def reset_angles(self,angles):
-    message="G92"+self.get_gcode_arguments_string(angles,False)
+    message="G92"+self._get_gcode_arguments_string(angles,False)
     self.send_message_and_wait_conf(message)
 
   #speed in deg/s , 100 deg/s is like a good value
@@ -115,7 +127,7 @@ class Robot:
     message="F"+str(speed)
     self.send_message_and_wait_conf(message)
 
-  def get_point_in_line_segment(self,p1,p2,rel_pos):
+  def _get_point_in_line_segment(self,p1,p2,rel_pos):
     p=[]
     number_of_indexes=min(len(p1),len(p2))
 
@@ -124,7 +136,7 @@ class Robot:
 
     return p
 
-  def dist_between_vectors(self,p1,p2):
+  def _get_dist_between_vectors(self,p1,p2):
     square_dist=0
     for i in range(len(p2)):
       square_dist+=math.pow(p2[i]-p1[i],2)
@@ -133,7 +145,7 @@ class Robot:
 
   def set_joint_speed_and_get_number_of_iterations(self,p1,p2):
     self.set_joint_speed(1000)
-    distance=self.dist_between_vectors(p1,p2)
+    distance=self._get_dist_between_vectors(p1,p2)
     N=math.ceil(distance)
     return N
   
@@ -152,7 +164,7 @@ class Robot:
     success=False
     i=0
     while(i<=N and success==False):
-      intermediate_pose=self.get_point_in_line_segment(p1,p2,i/N)
+      intermediate_pose=self._get_point_in_line_segment(p1,p2,i/N)
       success=self.probe(intermediate_pose)
       i+=1
 
@@ -174,4 +186,4 @@ class Robot:
     self.send_message_and_wait_conf("G28")
 
   def set_tool(self,args): #[x,y,z]
-    self.send_message_and_wait_conf("G10L2P1"+self.get_gcode_arguments_string(args))
+    self.send_message_and_wait_conf("G10L2P1"+self._get_gcode_arguments_string(args))

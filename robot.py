@@ -64,6 +64,7 @@ class Robot:
     return message=="ok"
 
   def reset_and_home_joints(self):
+    self.send_message_and_wait_conf("$RST=*")
     self.send_message_and_wait_conf("$H")
 
   def _get_gcode_arguments_string(self,args,args_represent_pose=True):

@@ -75,16 +75,17 @@ class Robot:
     s=""
     for i in range(len(args)):
       s=s+gcode_words[i]+str(round(args[i],2))
-
     return s
 
-  def _move(self,pose):
-    message="G1"+self._get_gcode_arguments_string(pose)
+  def _send_command_followed_by_arguments(self,command,arguments,args_represent_pose):
+    message=command+self._get_gcode_arguments_string(arguments,args_represent_pose)
     return self.send_message_and_wait_conf(message)
   
+  def _move(self,pose):
+    return self._send_command_followed_by_arguments("G1",pose,True)
+  
   def probe(self,pose):
-    message="G38.2"+self._get_gcode_arguments_string(pose)
-    return self.send_message_and_wait_conf(message)
+    return self._send_command_followed_by_arguments("G38.2",pose,True)
   
   def update_absolute_distance_mode(self,expected_value):
     if(self.absolute_distance_mode != expected_value):
@@ -118,10 +119,6 @@ class Robot:
   
   def get_angles(self):
     return self._ask_for_pos_json_and_return_property_value("angles")
-  
-  def reset_angles(self,angles):
-    message="G92"+self._get_gcode_arguments_string(angles,False)
-    self.send_message_and_wait_conf(message)
 
   #speed in deg/s , 100 deg/s is like a good value
   def set_joint_speed(self,speed):
@@ -144,7 +141,7 @@ class Robot:
 
     return math.sqrt(square_dist)
 
-  def set_joint_speed_and_get_number_of_iterations(self,p1,p2):
+  def _set_joint_speed_and_get_number_of_iterations(self,p1,p2):
     self.set_joint_speed(1000)
     distance=self._get_dist_between_vectors(p1,p2)
     N=math.ceil(distance)
@@ -152,7 +149,7 @@ class Robot:
   
   def linear_move_to_pose(self,p2):
     p1=self.get_tool_pose()
-    N=self.set_joint_speed_and_get_number_of_iterations(p1,p2)
+    N=self._set_joint_speed_and_get_number_of_iterations(p1,p2)
 
     for i in range(N+1):
       intermediate_pose=self.get_pose_in_line_segment(p1,p2,i/N)
@@ -160,7 +157,7 @@ class Robot:
 
   def linear_probe(self,p2):
     p1=self.get_tool_pose()
-    N=self.set_joint_speed_and_get_number_of_iterations(p1,p2)
+    N=self._set_joint_speed_and_get_number_of_iterations(p1,p2)
     
     success=False
     i=0
@@ -186,5 +183,8 @@ class Robot:
   def go_to_foetus_pos(self):
     self.send_message_and_wait_conf("G28")
 
-  def set_tool(self,args): #[x,y,z]
-    self.send_message_and_wait_conf("G10L2P1"+self._get_gcode_arguments_string(args))
+  def set_tool(self,coord): #[x,y,z]
+    return self._send_command_followed_by_arguments("G10L2P1",coord,True)
+
+  def reset_angles(self,angles):
+    return self._send_command_followed_by_arguments("G92",angles,False)

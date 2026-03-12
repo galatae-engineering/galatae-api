@@ -152,7 +152,7 @@ class Robot:
     N=self._set_joint_speed_and_get_number_of_iterations(p1,p2)
 
     for i in range(N+1):
-      intermediate_pose=self.get_pose_in_line_segment(p1,p2,i/N)
+      intermediate_pose=self._get_point_in_line_segment(p1,p2,i/N)
       self.go_to_pose(intermediate_pose)
 
   def linear_probe(self,p2):

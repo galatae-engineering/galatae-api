@@ -142,7 +142,7 @@ class Robot:
     return math.sqrt(square_dist)
 
   def _set_joint_speed_and_get_number_of_iterations(self,p1,p2):
-    self.set_joint_speed(1000)
+    #self.set_joint_speed(1000)
     distance=self._get_dist_between_vectors(p1,p2)
     N=math.ceil(distance)
     return N

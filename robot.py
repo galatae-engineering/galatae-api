@@ -156,6 +156,7 @@ class Robot:
       self.go_to_pose(intermediate_pose)
 
   def linear_probe(self,p2):
+    self.update_absolute_distance_mode(True)
     p1=self.get_tool_pose()
     N=self._set_joint_speed_and_get_number_of_iterations(p1,p2)
     

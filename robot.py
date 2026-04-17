@@ -23,7 +23,7 @@ class Robot:
     time.sleep(2)
     #self.reset_and_home_joints()
 
-  def _send_message(self,message):
+  def send_message(self,message):
     self.arduino.write((message+"\n").encode('utf-8'))
     if(self.debug):
       print(message+" sent")
@@ -40,8 +40,15 @@ class Robot:
     message=self._read_message()
     return message.strip()
 
+  def _wait_for_conf(self):
+    message=self._wait_for_message()
+    while(message!="ok" and message!="error"):
+      message=self._wait_for_message()
+
+    return message=="ok"
+  
   def send_message_and_wait_conf(self,message):
-    self._send_message(message)
+    self.send_message(message)
     return self._wait_for_conf()
 
   def _wait_for_message(self):
@@ -55,13 +62,6 @@ class Robot:
       self._print_message_from_serial(message)
     
     return message
-
-  def _wait_for_conf(self):
-    message=self._wait_for_message()
-    while(message!="ok" and message!="error"):
-      message=self._wait_for_message()
-
-    return message=="ok"
 
   def reset_and_home_joints(self):
     self.send_message_and_wait_conf("$RST=*")
@@ -102,7 +102,7 @@ class Robot:
     self._move(pose)
 
   def _ask_for_pos_json_and_return_property_value(self,property_name):
-    self._send_message("?")
+    self.send_message("?")
     
     property_value=""
     while(property_value==""):

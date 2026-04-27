@@ -4,6 +4,7 @@ from threading import Thread
 import json
 import math
 import serial.tools.list_ports
+import cv2 as cv
 
 class Robot:
   def __init__(self,debug=False):
@@ -192,3 +193,25 @@ class Robot:
 
   def disable_motors(self):
     self.send_message_and_wait_conf("M18")
+
+  def show_video(self):
+    cap = cv.VideoCapture(0)
+
+    if(cap.isOpened()):
+      while True:
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+    
+        if not ret:
+            print("Can't receive frame (stream end?). Exiting ...")
+            break
+        
+        cv.imshow('frame',frame)
+        if cv.waitKey(1) == ord('q'):
+            break
+    else:
+        print("Cannot open camera, so running without it.")
+
+    # When everything done, release the capture
+    cap.release()
+    cv.destroyAllWindows()

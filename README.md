@@ -5,6 +5,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install inputs
 pip install pyserial
+pip install opencv-python
 
 LAUNCH:
 cd ~/git/galatae_api

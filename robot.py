@@ -24,11 +24,6 @@ class Robot:
     time.sleep(2)
     #self.reset_and_home_joints()
 
-  def send_message(self,message):
-    self.arduino.write((message+"\n").encode('utf-8'))
-    if(self.debug):
-      print(message+" sent")
-
   def _read_message(self):
     a=self.arduino.readline()
     data = a.decode('utf-8', errors='ignore')
@@ -47,10 +42,6 @@ class Robot:
       message=self._wait_for_message()
 
     return message=="ok"
-  
-  def send_message_and_wait_conf(self,message):
-    self.send_message(message)
-    return self._wait_for_conf()
 
   def _wait_for_message(self):
     message=self._read_serial_buffer()
@@ -63,10 +54,6 @@ class Robot:
       self._print_message_from_serial(message)
     
     return message
-
-  def reset_and_home_joints(self):
-    self.send_message_and_wait_conf("$RST=*")
-    return self.send_message_and_wait_conf("$H")
 
   def _get_gcode_arguments_string(self,args,args_represent_pose=True):
     if(args_represent_pose):
@@ -84,23 +71,6 @@ class Robot:
   
   def _move(self,pose):
     return self._send_command_followed_by_arguments("G1",pose,True)
-  
-  def probe(self,pose):
-    return self._send_command_followed_by_arguments("G38.2",pose,True)
-  
-  def update_absolute_distance_mode(self,expected_value):
-    if(self.absolute_distance_mode != expected_value):
-      self.send_message_and_wait_conf(["G91","G90"][expected_value])
-      self.absolute_distance_mode=expected_value
-
-  #pose=[x,y,z,pitch (relative to z axis), roll (relative to arm),gripper angle]
-  def go_to_pose(self,pose):
-    self.update_absolute_distance_mode(True)
-    self._move(pose)
-      
-  def jog(self,pose):
-    self.update_absolute_distance_mode(False)
-    self._move(pose)
 
   def _ask_for_pos_json_and_return_property_value(self,property_name):
     self.send_message("?")
@@ -114,18 +84,7 @@ class Robot:
         pass
 
     return property_value
-
-  def get_tool_pose(self):
-    return self._ask_for_pos_json_and_return_property_value("tool_pose")
   
-  def get_angles(self):
-    return self._ask_for_pos_json_and_return_property_value("angles")
-
-  #speed in deg/s , 100 deg/s is like a good value
-  def set_joint_speed(self,speed):
-    message="F"+str(speed)
-    self.send_message_and_wait_conf(message)
-
   def _get_point_in_line_segment(self,p1,p2,rel_pos):
     p=[]
     number_of_indexes=min(len(p1),len(p2))
@@ -147,6 +106,47 @@ class Robot:
     distance=self._get_dist_between_vectors(p1,p2)
     N=math.ceil(distance)
     return N
+  
+  def send_message(self,message):
+    self.arduino.write((message+"\n").encode('utf-8'))
+    if(self.debug):
+      print(message+" sent")
+
+  def send_message_and_wait_conf(self,message):
+    self.send_message(message)
+    return self._wait_for_conf()
+
+  def reset_and_home_joints(self):
+    self.send_message_and_wait_conf("$RST=*")
+    return self.send_message_and_wait_conf("$H")
+  
+  def probe(self,pose):
+    return self._send_command_followed_by_arguments("G38.2",pose,True)
+  
+  def update_absolute_distance_mode(self,expected_value):
+    if(self.absolute_distance_mode != expected_value):
+      self.send_message_and_wait_conf(["G91","G90"][expected_value])
+      self.absolute_distance_mode=expected_value
+
+  #pose=[x,y,z,pitch (relative to z axis), roll (relative to arm),gripper angle]
+  def go_to_pose(self,pose):
+    self.update_absolute_distance_mode(True)
+    self._move(pose)
+      
+  def jog(self,pose):
+    self.update_absolute_distance_mode(False)
+    self._move(pose)
+
+  def get_tool_pose(self):
+    return self._ask_for_pos_json_and_return_property_value("tool_pose")
+  
+  def get_angles(self):
+    return self._ask_for_pos_json_and_return_property_value("angles")
+
+  #speed in deg/s , 100 deg/s is like a good value
+  def set_joint_speed(self,speed):
+    message="F"+str(speed)
+    self.send_message_and_wait_conf(message)
   
   def linear_move_to_pose(self,p2):
     p1=self.get_tool_pose()
@@ -212,6 +212,5 @@ class Robot:
     else:
         print("Cannot open camera, so running without it.")
 
-    # When everything done, release the capture
     cap.release()
     cv.destroyAllWindows()

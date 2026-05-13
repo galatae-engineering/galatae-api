@@ -116,8 +116,10 @@ class Robot:
     self.send_message(message)
     return self._wait_for_conf()
 
-  def reset_and_home_joints(self):
-    self.send_message_and_wait_conf("$RST=*")
+  def reset(self):
+    return self.send_message_and_wait_conf("$RST=*")
+
+  def calibrate(self):
     return self.send_message_and_wait_conf("$H")
   
   def probe(self,pose):

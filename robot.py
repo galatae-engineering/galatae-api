@@ -4,7 +4,10 @@ from threading import Thread
 import json
 import math
 import serial.tools.list_ports
-import cv2 as cv
+try:
+  import cv2 as cv
+except:
+  pass
 
 class Robot:
   def __init__(self,debug=False):

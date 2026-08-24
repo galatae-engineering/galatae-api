@@ -34,7 +34,7 @@ Creates a new `Robot` instance. Automatically searches connected serial ports fo
 Sends the homing command (`$H`), moving the arm to its reference/home position.
 
 ### `set_joint_speed(speed)`
-Sets the joint movement speed in degrees per second. A value around `100` is a reasonable default.
+Sets the joint movement speed in degrees per second. A value around `50` is a reasonable default.
 
 ### `go_to_pose(pose)`
 Moves the arm to an absolute `pose` (`[x, y, z, pitch, roll, gripper_angle (optional)]`).

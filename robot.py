@@ -196,6 +196,9 @@ class Robot:
   def reset_angles(self,angles):
     return self._send_command_followed_by_arguments("G92",angles,False)
 
+  def enable_motors(self):
+    self.send_message_and_wait_conf("M17")
+
   def disable_motors(self):
     self.send_message_and_wait_conf("M18")
 

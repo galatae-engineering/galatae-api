@@ -16,11 +16,13 @@ pip install pyserial opencv-python
 from robot import Robot
 
 r = Robot()
+r.set_joint_speed(50)
+r.enable_motors()
 r.calibrate()
-r.set_joint_speed(100)
-r.go_to_pose([100, 0, 50, 0, 0, 0])
+r.go_to_pose([450, 0, 300, 180, 0])
+print(r.get_tool_pose())
 r.go_to_foetus_pos()
-r.desable_motors()
+r.disable_motors()
 ```
 
 ## API Reference
@@ -48,6 +50,9 @@ Queries the board and returns the current tool-center-point pose as reported by 
 
 ### `get_angles()`
 Queries the board and returns the current joint angles as reported by the firmware.
+
+### `enable_motors()`
+Energies the motors (`M17`).
 
 ### `disable_motors()`
 Disables/de-energizes the motors (`M18`), allowing the arm to be moved freely by hand.

@@ -16,10 +16,10 @@ pip install pyserial opencv-python
 from robot import Robot
 
 r = Robot()
-r.set_joint_speed(50)
-r.enable_motors()
+r.reset()
 r.calibrate()
-r.go_to_pose([450, 0, 300, 180, 0])
+r.set_joint_speed(20) # deg/sec
+print(r.go_to_pose([400, 300, 200, 180, 45])) # [x, y, z, pitch, roll] (mm and deg)
 print(r.get_tool_pose())
 r.go_to_foetus_pos()
 r.disable_motors()

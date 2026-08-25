@@ -136,11 +136,11 @@ class Robot:
   #pose=[x,y,z,pitch (relative to z axis), roll (relative to arm),gripper angle]
   def go_to_pose(self,pose):
     self.update_absolute_distance_mode(True)
-    self._move(pose)
+    return self._move(pose)
       
   def jog(self,pose):
     self.update_absolute_distance_mode(False)
-    self._move(pose)
+    return self._move(pose)
 
   def get_tool_pose(self):
     return self._ask_for_pos_json_and_return_property_value("tool_pose")

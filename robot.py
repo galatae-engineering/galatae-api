@@ -148,6 +148,9 @@ class Robot:
   def get_angles(self):
     return self._ask_for_pos_json_and_return_property_value("angles")
 
+  def get_extra_sensor_state(self):
+    return self._ask_for_pos_json_and_return_property_value("extra_sensor_state")
+
   #speed in deg/s , 100 deg/s is like a good value
   def set_joint_speed(self,speed):
     message="F"+str(speed)

@@ -39,13 +39,6 @@ class Robot:
     message=self._read_message()
     return message.strip()
 
-  def _wait_for_conf(self):
-    message=self._wait_for_message()
-    while(message!="ok" and message!="error"):
-      message=self._wait_for_message()
-
-    return message=="ok"
-
   def _wait_for_message(self):
     message=self._read_serial_buffer()
     
@@ -58,6 +51,19 @@ class Robot:
     
     return message
 
+  def _wait_for_conf(self):
+    message=self._wait_for_message()
+    history=""
+    while(message!="ok" and message!="error"):
+      history+=message+"\n"
+      message=self._wait_for_message()
+      
+
+    if message == "error":
+      raise Exception(history)
+
+    return message=="ok"
+  
   def _get_gcode_arguments_string(self,args,args_represent_pose=True):
     if(args_represent_pose):
       gcode_words=["X","Y","Z","A","B","C"]
@@ -68,6 +74,10 @@ class Robot:
       s=s+gcode_words[i]+str(round(args[i],2))
     return s
 
+  def send_message_and_wait_conf(self,message):
+    self.send_message(message)
+    return self._wait_for_conf()
+  
   def _send_command_followed_by_arguments(self,command,arguments,args_represent_pose):
     message=command+self._get_gcode_arguments_string(arguments,args_represent_pose)
     return self.send_message_and_wait_conf(message)
@@ -115,14 +125,10 @@ class Robot:
     if(self.debug):
       print(message+" sent")
 
-  def send_message_and_wait_conf(self,message):
-    self.send_message(message)
-    return self._wait_for_conf()
-
   def reset(self):
     return self.send_message_and_wait_conf("$RST=*")
 
-  def calibrate(self):
+  def home(self):
     return self.send_message_and_wait_conf("$H")
   
   def probe(self,pose):

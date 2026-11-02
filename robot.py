@@ -185,18 +185,22 @@ class Robot:
     return success
 
   def open_gripper(self,extra_degrees=0):
+    pass
+    """
     gcode="M101"
     if(extra_degrees!=0):
       gcode+="P"+str(extra_degrees)
     self.send_message_and_wait_conf(gcode)
+    """
 
   def close_gripper(self,extra_degrees=0):
-    self.send_message_and_wait_conf("M100P"+str(extra_degrees))
+    pass
+    #self.send_message_and_wait_conf("M100P"+str(extra_degrees))
 
   def calibrate_gripper(self):
     self.send_message_and_wait_conf("$H")
 
-  def go_to_foetus_pos(self):
+  def go_to_sleep_pos(self):
     self.send_message_and_wait_conf("G28")
 
   def set_tool(self,coord): #[x,y,z]
